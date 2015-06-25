@@ -1,4 +1,4 @@
-﻿// iTunnel mod with restore mode comm support
+// iTunnel mod with restore mode comm support
 // Based on iPhone_tunnel by novi (novi.mad@gmail.com ) http://novis.jimdo.com
 // thanks
 // http://i-funbox.com/blog/2008/09/itunesmobiledevicedll-changed-in-itunes-80/
@@ -30,9 +30,7 @@ typedef enum PROGRAM_MODE {
 static PROGRAM_MODE g_programMode = MODE_NONE;
 
 typedef char OPTION_T [BUFSIZ];
-Y_ERROR = 0x07,
-		EXIT_LOAD_ERROR  = 0x08,
-};
+
 
 #pragma mark Prototype definition
 
@@ -45,24 +43,27 @@ Y_ERROR = 0x07,
 
 struct connection
 {
-        int from_handle;
-        int to_handle;
+	int from_handle;
+	int to_handle;
 };
 
 void* THREADPROCATTR wait_for_device(void*);
 void wait_connections();
-void notification(struct am_device_notification_callback_info*��ルを投げる
-        fflush(stdout);
-        signal(sig, SIG_DFL);
-        raise(sig);
-}
-#endif
+void notification(struct am_device_notification_callback_info*);
+void*THREADPROCATTR conn_forwarding_thread(void* arg);
 
 #pragma mark Main function
 
 #if WIN32 
-	const uint g_iphone_port = 22;
-innst unsigned short default_local_port GetLparse_args(int argc, char *argv [])
+	const unsigned short default_local_port = 22;
+#else
+	const unsigned short default_local_port = 2022;
+#endif
+
+int g_iphone_port = 22;
+int g_local_port = default_local_port;
+
+int parse_args(int argc, char *argv [])
 {
 	char** pArg;
 	for (pArg = argv + 1; pArg < argv + argc; ++pArg) {
@@ -131,17 +132,16 @@ innst unsigned short default_local_port GetLparse_args(int argc, char *argv [])
 void usage()
 {
 printf(
-			"\niphone_tunnel v2.0 for Win/�ータ確認
-        // ヘルプ表示
-        if ( !(argc >= 3 && argc <= 4))
-     ((rev 5))\n"
+			"\niphone_tunnel v2.0 for Win/Mac\n"
+			"Created by novi. (novi.mad@gmail.com)\n"
+			"Restore mode hack by msft.guy ((rev 5))\n"
 			"\n"
-			"            printf(
- --tunnel [--iport <iPhone port>] [--lport <Local port>]\n"
+			"Usage: iphone_tunnel --tunnel [--iport <iPhone port>] [--lport <Local port>]\n"
 			"OR: iphone_tunnel --autoboot\tto kick out of the recovery mode\n"
 			"OR: iphone_tunnel [--ibss <iBSS file>] [--exploit <iBSS USB exploit payload>]\n"
 			"\t[--ibec <iBEC file>] [--ramdisk <ramdisk file>]\n"
-			"\t[--devicetree <devicetree file>] [--kernelcache <kernelcache file>]r Mac\n"\t[--ramdisk-command <command to execute after sending ramdisk, default is 'ramdisk'>]\n"
+			"\t[--devicetree <devicetree file>] [--kernelcache <kernelcache file>]\n"
+			"\t[--ramdisk-command <command to execute after sending ramdisk, default is 'ramdisk'>]\n"
 			"\t[--ramdisk-delay <delay before loading ramdisk, in seconds, default is 5>]\n"
 			"\t[--go-command <command to execute after sending iBEC, default is 'go'>]\n"
 			"\t[--verbose <verbose level>]\n"
@@ -151,7 +151,9 @@ printf(
 			"\tiphone_tunnel --lport 2022\n"
 			"\tiphone_tunnel --ibec iBEC_file_from_custom_FW --ramdisk created_ramdisk.dmg.ssh --devicetree DevicetreeXXX.img3 --kernelcache kernelcache_file_from_custom_FW --ramdisk-command \"ramdisk 0x90000000\"\n"
 			"\n"
-			"Default ports are 22(iPhone) <-> %hu(this machine)                           sto}
+			"Default ports are 22(iPhone) <-> %hu(this machine)\n", default_local_port
+			);
+}
 
 int main (int argc, char *argv [])
 {
